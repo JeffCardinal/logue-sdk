@@ -1,5 +1,5 @@
 # #############################################################################
-# Prologue Oscillator Makefile
+# Prologue Mod. FX Makefile
 # #############################################################################
 
 ifeq ($(OS),Windows_NT)
@@ -12,8 +12,8 @@ else
     detected_OS := $(shell uname -s)
 endif
 
-PLATFORMDIR = ..
-PROJECTDIR = .
+PLATFORMDIR = ../../..
+PROJECTDIR = ../..
 TOOLSDIR = $(PLATFORMDIR)/../../tools
 EXTDIR = $(PLATFORMDIR)/../ext
 
@@ -74,11 +74,11 @@ CXXOPT = -std=c++11 -fno-rtti -fno-exceptions -fno-non-call-exceptions
 LDOPT = -Xlinker --just-symbols=$(LDDIR)/osc_api.syms
 
 CWARN = -W -Wall -Wextra
-CXXWARN = -W -Wall -Wextra -Wdouble-promotion -Wfloat-conversion -Werror
+CXXWARN =
 
 FPU_OPTS = -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant -fcheck-new
 
-OPT = -g -Os -mlittle-endian
+OPT = -g -Os -mlittle-endian 
 OPT += $(FPU_OPTS)
 #OPT += -flto
 

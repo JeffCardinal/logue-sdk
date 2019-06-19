@@ -41,8 +41,8 @@
 #include "userosc.h"
 
 typedef struct State {
-  float w0;
-  float phase;
+  float w0;    //phase increment
+  float phase; //phase accumulator 
   float duty;
   float angle;
   float lfo, lfoz;
@@ -66,26 +66,34 @@ void OSC_INIT(uint32_t platform, uint32_t api)
   s_state.flags = k_flags_none;
 }
 
+//yn start buffer
+//y is current pos in buffer
+//ye end buffer
+//frame = 1 buffer
 void OSC_CYCLE(const user_osc_param_t * const params,
                int32_t *yn,
                const uint32_t frames)
 {
   const uint8_t flags = s_state.flags;
   s_state.flags = k_flags_none;
-    
+  
   const float w0 = s_state.w0 = osc_w0f_for_note((params->pitch)>>8, params->pitch & 0xFF);
   float phase = (flags & k_flag_reset) ? 0.f : s_state.phase;
   
   const float duty = s_state.duty;
   const float angle = s_state.angle;
 
+  //q is fixed point. there is a conversion happening here to float
+  //params sent by synth
   const float lfo = s_state.lfo = q31_to_f32(params->shape_lfo);
+
   float lfoz = (flags & k_flag_reset) ? lfo : s_state.lfoz;
   const float lfo_inc = (lfo - lfoz) / frames;
   
   q31_t * __restrict y = (q31_t *)yn;
   const q31_t * y_e = y + frames;
   
+  //osc loop that fills the buffer 
   for (; y != y_e; ) {
     const float pwm = clipminmaxf(0.1f, duty + lfoz, 0.9f);
 
@@ -96,7 +104,7 @@ void OSC_CYCLE(const user_osc_param_t * const params,
     *(y++) = f32_to_q31(sig);
 
     phase += w0;
-    phase -= (uint32_t)phase;
+    phase (uint32_t)phase; //integer value of the phase (phase %= 1)
 
     lfoz += lfo_inc;
   }
