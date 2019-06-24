@@ -39,6 +39,7 @@
  */
 
 #include "userosc.h"
+#include <math.h>
 
 typedef struct State {
   float w0;    //phase increment
@@ -51,7 +52,7 @@ typedef struct State {
 
 enum {
   k_flags_none = 0,
-  k_flag_reset = 1<<0,
+  k_flag_reset = 1<<0
 };
 
 static State s_state;
@@ -97,14 +98,20 @@ void OSC_CYCLE(const user_osc_param_t * const params,
   for (; y != y_e; ) {
     const float pwm = clipminmaxf(0.1f, duty + lfoz, 0.9f);
 
-    float sig = (phase - pwm <= 0.f) ? 1.f : -1.f;
+    //float sig = (phase - pwm <= 0.f) ? 1.f : -1.f;
+
+    //what is frequency? w0?
+
+    float sig = -2 / 4*atan(1) * atan(1/tan(w0 * 3.14159265358979323846 * (*y / *y_e)));
 
     sig *= 1.f - (angle * phase);
 
     *(y++) = f32_to_q31(sig);
 
     phase += w0;
-    phase (uint32_t)phase; //integer value of the phase (phase %= 1)
+
+    //integer value of the phase (phase %= 1)
+    phase -= (uint32_t)phase; 
 
     lfoz += lfo_inc;
   }
