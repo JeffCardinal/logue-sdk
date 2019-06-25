@@ -2,11 +2,11 @@
 # Project Customization
 # #############################################################################
 
-PROJECT = jeffosc
+PROJECT = silly
 
 UCSRC = 
 
-UCXXSRC = ../src/jeffosc.cpp
+UCXXSRC = ../src/silly.cpp
 
 UINCDIR =
 

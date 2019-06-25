@@ -42,7 +42,7 @@
 #include <math.h>
 
 typedef struct State {
-  float w0;    //phase increment
+  float w0;    //phase increment (frequency)
   float phase; //phase accumulator 
   float duty;
   float angle;
@@ -102,18 +102,18 @@ void OSC_CYCLE(const user_osc_param_t * const params,
 
     //what is frequency? w0?
 
-    float sig = -2 / 4*atan(1) * atan(1/tan(w0 * 3.14159265358979323846 * (*y / *y_e)));
+    float sig = -2 / 4*atan(1);// * atan(1/tan(w0 * 3.14159265358979323846 * (*y / *y_e)));
 
-    sig *= 1.f - (angle * phase);
+    //sig *= 1.f - (angle * phase);
 
     *(y++) = f32_to_q31(sig);
 
-    phase += w0;
+    //phase += w0;
 
     //integer value of the phase (phase %= 1)
-    phase -= (uint32_t)phase; 
+    //phase -= (uint32_t)phase; 
 
-    lfoz += lfo_inc;
+    //lfoz += lfo_inc;
   }
   
   s_state.phase = phase;
