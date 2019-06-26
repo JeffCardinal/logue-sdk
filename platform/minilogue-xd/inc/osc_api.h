@@ -660,6 +660,12 @@ extern "C" {
     return x - c * (x*x*x);
   }
 
+  __fast_inline float osc_softclip2f(const float c, float x)
+  {
+    x = clip1m1f(x);
+    return x - c * (x*x*x*x);
+  }
+
 #define k_cubicsat_size_exp  (7)
 #define k_cubicsat_size      (1U<<k_cubicsat_size_exp)
 #define k_cubicsat_mask      (k_cubicsat_size-1)
