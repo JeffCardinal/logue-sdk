@@ -47,6 +47,8 @@ typedef struct State {
   float phase;
   float drive;
   float dist;
+  float air;
+  float para;
   float lfo, lfoz;
   uint8_t flags;
 } State;
@@ -60,12 +62,12 @@ static State s_state;
 
 void OSC_INIT(uint32_t platform, uint32_t api)
 {
-  // (void)platform;
-  // (void)api;
   s_state.w0     = 0.f;
   s_state.phase  = 0.f;
   s_state.drive  = 1.f;
   s_state.dist   = 0.f;
+  s_state.air    = 0.f;
+  s_state.para   = 0.f;
   s_state.lfo = s_state.lfoz = 0.f;
   s_state.flags = k_flags_none;
 }
@@ -74,14 +76,19 @@ void OSC_CYCLE(const user_osc_param_t * const params,
                int32_t *yn,
                const uint32_t frames)
 {
+  //Handle events
   const uint8_t flags = s_state.flags;
   s_state.flags = k_flags_none;
 
-  const float w0 = s_state.w0 = osc_w0f_for_note((params->pitch)>>8, params->pitch & 0xFF);
+  //Update the pitch
+  const float w0 = s_state.w0 = osc_w0f_for_note((params->pitch)>>8, params->pitch & 0xFF); 
+  
   float phase = (flags & k_flag_reset) ? 0.f : s_state.phase;
 
   const float drive = s_state.drive;
   const float dist  = s_state.dist;
+  const float air   = s_state.air;
+  const float para  = s_state.para;
 
   const float lfo = s_state.lfo = q31_to_f32(params->shape_lfo);
   float lfoz = (flags & k_flag_reset) ? lfo : s_state.lfoz;
@@ -90,15 +97,20 @@ void OSC_CYCLE(const user_osc_param_t * const params,
   q31_t * __restrict y = (q31_t *)yn;
   const q31_t * y_e = y + frames;
 
+  //Main oscillator loop
   for (; y != y_e; ) {
     const float dist_mod = dist + lfoz * dist;
 
-    float p = phase + linintf(dist_mod, 0.f, dist_mod * osc_parf(phase));
+    float p = phase + linintf(dist_mod, 0.f, dist_mod * osc_sawf(0.1f-phase));
+    
+    //Reset phase if needed, basically a mod function
     p = (p <= 0) ? 1.f - p : p - (uint32_t)p;
 
     float sig = osc_sawf(p);
-    sig += 0.2f * osc_white();
-    sig = osc_softclipf(0.3f, drive * sig);
+    sig += air * osc_white();
+    sig = osc_softclipf(0.25f, drive * osc_sawf(p));
+
+    //Convert the signal from floating point to fixed point integer  
     *(y++) = f32_to_q31(sig);
 
     phase += w0;
@@ -108,7 +120,7 @@ void OSC_CYCLE(const user_osc_param_t * const params,
   }
 
   s_state.phase = phase;
-  s_state.lfoz = lfoz;
+  s_state.lfoz  = lfoz;
 }
 
 void OSC_NOTEON(const user_osc_param_t * const params)
@@ -126,19 +138,25 @@ void OSC_PARAM(uint16_t index, uint16_t value)
   const float valf = param_val_to_f32(value);
   
   switch (index) {
-  case k_osc_param_id1:
-  case k_osc_param_id2:
-  case k_osc_param_id3:
-  case k_osc_param_id4:
-  case k_osc_param_id5:
-  case k_osc_param_id6:
-  case k_osc_param_shape:
-    s_state.dist = 0.9f * valf;
-    break;
-  case k_osc_param_shiftshape:
-    s_state.drive = 2.f + valf; 
-    break;
-  default:
-    break;
+    case k_osc_param_id1:
+      s_state.air = 0.4f * valf;
+      break;
+    case k_osc_param_id2:
+      s_state.para = 1.f * valf;
+      break;
+    case k_osc_param_id3:
+    case k_osc_param_id4:
+    case k_osc_param_id5:
+    case k_osc_param_id6:
+    case k_osc_param_shape:
+      s_state.dist = 0.2f * valf + 0.1;
+      s_state.para = 0.5f * valf;
+      break;
+    case k_osc_param_shiftshape:
+      s_state.drive = 1.f + valf;
+      s_state.air = 0.4f * valf;
+      break;
+    default:
+      break;
   }
-}
+} 
