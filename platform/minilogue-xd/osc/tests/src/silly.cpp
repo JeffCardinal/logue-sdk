@@ -41,6 +41,7 @@
 #include "userosc.h"
 #include <math.h>
 #include <stdlib.h>
+#include <cstdlib>
 
 typedef struct State {
   float w0;
@@ -101,14 +102,14 @@ void OSC_CYCLE(const user_osc_param_t * const params,
   for (; y != y_e; ) {
     const float dist_mod = dist + lfoz * dist;
 
-    float p = phase + linintf(dist_mod, 0.f, dist_mod * osc_sawf(0.1f-phase));
+    float p = phase + linintf(dist_mod, 1.f, dist_mod * osc_sawf(0.1f-phase));
     
     //Reset phase if needed, basically a mod function
     p = (p <= 0) ? 1.f - p : p - (uint32_t)p;
 
     float sig = osc_sawf(p);
     sig += air * osc_white();
-    sig = osc_softclipf(0.25f, drive * osc_sawf(p));
+    sig = osc_softclipf(0.5f, drive * sig);//osc_sawf(p));
 
     //Convert the signal from floating point to fixed point integer  
     *(y++) = f32_to_q31(sig);
@@ -139,7 +140,7 @@ void OSC_PARAM(uint16_t index, uint16_t value)
   
   switch (index) {
     case k_osc_param_id1:
-      s_state.air = 0.4f * valf;
+      s_state.air = 0.2 f * valf;
       break;
     case k_osc_param_id2:
       s_state.para = 1.f * valf;
@@ -149,12 +150,12 @@ void OSC_PARAM(uint16_t index, uint16_t value)
     case k_osc_param_id5:
     case k_osc_param_id6:
     case k_osc_param_shape:
-      s_state.dist = 0.2f * valf + 0.1;
-      s_state.para = 0.5f * valf;
+      s_state.dist = 0.2f * valf;
+      // s_state.para = 0.5f * valf;
       break;
     case k_osc_param_shiftshape:
       s_state.drive = 1.f + valf;
-      s_state.air = 0.4f * valf;
+      // s_state.air = 0.4f * valf;
       break;
     default:
       break;
