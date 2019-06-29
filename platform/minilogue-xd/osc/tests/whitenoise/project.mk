@@ -2,11 +2,11 @@
 # Project Customization
 # #############################################################################
 
-PROJECT = silly
+PROJECT = whitenoise
 
 UCSRC = 
 
-UCXXSRC = ../src/silly.cpp
+UCXXSRC = ../src/whitenoise.cpp
 
 UINCDIR =
 

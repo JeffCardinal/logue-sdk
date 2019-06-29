@@ -32,7 +32,7 @@
 //*/
 
 /*
- * File: square.cpp
+ * File: square2.cpp
  *
  * Naive square oscillator test
  *
@@ -99,8 +99,6 @@ void OSC_CYCLE(const user_osc_param_t * const params,
     const float pwm = clipminmaxf(0.1f, duty + lfoz, 0.9f);
 
     //float sig = (phase - pwm <= 0.f) ? 1.f : -1.f;
-
-    //what is frequency? w0?
 
     float sig = -2 / 4*atan(1);// * atan(1/tan(w0 * 3.14159265358979323846 * (*y / *y_e)));
 
