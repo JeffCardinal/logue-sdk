@@ -154,6 +154,9 @@ void OSC_PARAM(uint16_t index, uint16_t value)
     case k_osc_param_shiftshape:
       s_state.drive = 1.f + valf;
       break;
+    case k_osc_param_shiftshape:
+      s_state.drive = 1.f + valf;
+      break;
     default:
       break;
   }
