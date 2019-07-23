@@ -32,7 +32,7 @@
 //*/
 
 /*
- * File: silly.cpp
+ * File: gojira.cpp
  *
  * Naive saw oscillator test
  *
@@ -139,11 +139,7 @@ void OSC_PARAM(uint16_t index, uint16_t value)
   
   switch (index) {
     case k_osc_param_id1:
-      s_state.air = 0.2 f * valf;
-      break;
     case k_osc_param_id2:
-      s_state.para = 1.f * valf;
-      break;
     case k_osc_param_id3:
     case k_osc_param_id4:
     case k_osc_param_id5:
@@ -154,10 +150,7 @@ void OSC_PARAM(uint16_t index, uint16_t value)
     case k_osc_param_shiftshape:
       s_state.drive = 1.f + valf;
       break;
-    case k_osc_param_shiftshape:
-      s_state.drive = 1.f + valf;
-      break;
     default:
       break;
   }
-} 
+}
